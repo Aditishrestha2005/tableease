@@ -7,6 +7,7 @@ class AuthService {
   async registerUser(userData: {
     name: string;
     email: string;
+    phoneNumber: string;
     password: string;
   }) {
     // Validate input
@@ -33,15 +34,16 @@ class AuthService {
 
     // Generate JWT
     const token = generateToken(
-      newUser._id.toString(),
+      String(newUser._id),
       newUser.role
     );
 
     return {
       user: {
-        id: newUser._id,
+        id: String(newUser._id),
         name: newUser.name,
         email: newUser.email,
+        phoneNumber: newUser.phoneNumber,
         role: newUser.role,
       },
       token,
