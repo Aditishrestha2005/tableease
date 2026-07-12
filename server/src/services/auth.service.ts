@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
 import userRepository from "../repositories/user.repository";
-import { loginSchema, registerSchema } from "../validators/auth.validator";
+import {
+  loginSchema,
+  registerSchema,
+} from "../validators/auth.validator";
 import generateToken from "../utils/generateToken";
 
 class AuthService {
-
   async registerUser(userData: {
     name: string;
     email: string;
@@ -43,7 +45,6 @@ class AuthService {
     };
   }
 
- 
   async loginUser(userData: {
     email: string;
     password: string;
@@ -56,9 +57,10 @@ class AuthService {
       throw new Error("Invalid email or password.");
     }
 
-    // Account lock check
     if (user.lockUntil && user.lockUntil > new Date()) {
-      throw new Error("Account is temporarily locked. Please try again later.");
+      throw new Error(
+        "Account is temporarily locked. Please try again later."
+      );
     }
 
     const passwordMatch = await bcrypt.compare(
@@ -69,7 +71,6 @@ class AuthService {
     if (!passwordMatch) {
       user.failedLoginAttempts += 1;
 
-      // Lock after 5 failed attempts
       if (user.failedLoginAttempts >= 5) {
         user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
       }
@@ -79,7 +80,6 @@ class AuthService {
       throw new Error("Invalid email or password.");
     }
 
-    // Reset failed attempts
     user.failedLoginAttempts = 0;
     user.lockUntil = undefined;
 
@@ -96,6 +96,24 @@ class AuthService {
         role: user.role,
       },
       token,
+    };
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    return {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profileImage: user.profileImage,
+      mfaEnabled: user.mfaEnabled,
     };
   }
 }
