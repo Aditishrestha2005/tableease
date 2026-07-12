@@ -1,5 +1,8 @@
 import tableRepository from "../repositories/table.repository";
-import { tableSchema } from "../validators/table.validator";
+import {
+  tableSchema,
+  updateTableSchema,
+} from "../validators/table.validator";
 
 class TableService {
 
@@ -26,8 +29,6 @@ class TableService {
   async getAllTables() {
     return await tableRepository.getAllTables();
   }
-
-
   async getTableById(id: string) {
     const table = await tableRepository.getTableById(id);
 
@@ -38,7 +39,6 @@ class TableService {
     return table;
   }
 
-
   async updateTable(
     id: string,
     data: {
@@ -48,16 +48,35 @@ class TableService {
       status?: "available" | "maintenance";
     }
   ) {
-    const table = await tableRepository.updateTable(id, data);
+    // Validate update data
+    const validatedData = updateTableSchema.parse(data);
 
-    if (!table) {
+    // Check duplicate table number
+    if (validatedData.tableNumber !== undefined) {
+      const existingTable = await tableRepository.findByTableNumber(
+        validatedData.tableNumber
+      );
+
+      if (
+        existingTable &&
+        String(existingTable._id) !== id
+      ) {
+        throw new Error("Table number already exists.");
+      }
+    }
+
+    const updatedTable = await tableRepository.updateTable(
+      id,
+      validatedData
+    );
+
+    if (!updatedTable) {
       throw new Error("Table not found.");
     }
 
-    return table;
+    return updatedTable;
   }
 
-  
   async deleteTable(id: string) {
     const table = await tableRepository.deleteTable(id);
 
