@@ -1,19 +1,18 @@
 import bcrypt from "bcrypt";
 import userRepository from "../repositories/user.repository";
-import { registerSchema } from "../validators/auth.validator";
+import { loginSchema, registerSchema } from "../validators/auth.validator";
 import generateToken from "../utils/generateToken";
 
 class AuthService {
+
   async registerUser(userData: {
     name: string;
     email: string;
     phoneNumber: string;
     password: string;
   }) {
-    // Validate input
     const validatedData = registerSchema.parse(userData);
 
-    // Check if email already exists
     const existingUser = await userRepository.findUserByEmail(
       validatedData.email
     );
@@ -22,21 +21,15 @@ class AuthService {
       throw new Error("Email already exists.");
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 12);
 
-    // Create user
     const newUser = await userRepository.createUser({
       ...validatedData,
       password: hashedPassword,
       passwordHistory: [hashedPassword],
     });
 
-    // Generate JWT
-    const token = generateToken(
-      String(newUser._id),
-      newUser.role
-    );
+    const token = generateToken(String(newUser._id), newUser.role);
 
     return {
       user: {
@@ -45,6 +38,62 @@ class AuthService {
         email: newUser.email,
         phoneNumber: newUser.phoneNumber,
         role: newUser.role,
+      },
+      token,
+    };
+  }
+
+ 
+  async loginUser(userData: {
+    email: string;
+    password: string;
+  }) {
+    const validatedData = loginSchema.parse(userData);
+
+    const user = await userRepository.findUserByEmail(validatedData.email);
+
+    if (!user) {
+      throw new Error("Invalid email or password.");
+    }
+
+    // Account lock check
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      throw new Error("Account is temporarily locked. Please try again later.");
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      validatedData.password,
+      user.password
+    );
+
+    if (!passwordMatch) {
+      user.failedLoginAttempts += 1;
+
+      // Lock after 5 failed attempts
+      if (user.failedLoginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+      }
+
+      await user.save();
+
+      throw new Error("Invalid email or password.");
+    }
+
+    // Reset failed attempts
+    user.failedLoginAttempts = 0;
+    user.lockUntil = undefined;
+
+    await user.save();
+
+    const token = generateToken(String(user._id), user.role);
+
+    return {
+      user: {
+        id: String(user._id),
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
       },
       token,
     };
