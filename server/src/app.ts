@@ -3,6 +3,7 @@ import authRoutes from "./routes/auth.route";
 import errorHandler from "./middleware/error.middleware";
 import authMiddleware, { AuthRequest } from "./middleware/auth.middleware";
 import roleMiddleware from "./middleware/role.middleware";
+import restaurantRoutes from "./routes/restaurant.route";
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.get("/", (_req, res) => {
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/restaurant", restaurantRoutes);
+
 
 app.get("/api/v1/protected", authMiddleware, (req: AuthRequest, res) => {
   res.status(200).json({
