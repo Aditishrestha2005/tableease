@@ -4,6 +4,7 @@ import {
   loginSchema,
   registerSchema,
 } from "../validators/auth.validator";
+import { changePasswordSchema } from "../validators/changePassword.validator";
 import generateToken from "../utils/generateToken";
 
 class AuthService {
@@ -114,6 +115,78 @@ class AuthService {
       role: user.role,
       profileImage: user.profileImage,
       mfaEnabled: user.mfaEnabled,
+    };
+  }
+  async changePassword(
+    userId: string,
+    data: {
+      currentPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    }
+  ) {
+    const validatedData = changePasswordSchema.parse(data);
+
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    // Check current password
+    const isCurrentPasswordValid = await bcrypt.compare(
+      validatedData.currentPassword,
+      user.password
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new Error("Current password is incorrect.");
+    }
+
+    // Prevent using current password again
+    const isSamePassword = await bcrypt.compare(
+      validatedData.newPassword,
+      user.password
+    );
+
+    if (isSamePassword) {
+      throw new Error(
+        "New password cannot be the same as the current password."
+      );
+    }
+
+    // Prevent reuse of last 5 passwords
+    for (const oldPassword of user.passwordHistory.slice(-5)) {
+      const isReused = await bcrypt.compare(
+        validatedData.newPassword,
+        oldPassword
+      );
+
+      if (isReused) {
+        throw new Error(
+          "You cannot reuse any of your last 5 passwords."
+        );
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      validatedData.newPassword,
+      12
+    );
+
+    user.password = hashedPassword;
+
+    user.passwordHistory.push(hashedPassword);
+
+    if (user.passwordHistory.length > 5) {
+      user.passwordHistory =
+        user.passwordHistory.slice(-5);
+    }
+
+    await user.save();
+
+    return {
+      message: "Password changed successfully.",
     };
   }
 }

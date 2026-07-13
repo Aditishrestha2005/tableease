@@ -16,6 +16,7 @@ class AuthController {
       next(error);
     }
   }
+
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await authService.loginUser(req.body);
@@ -29,6 +30,7 @@ class AuthController {
       next(error);
     }
   }
+
   async getCurrentUser(
     req: AuthRequest,
     res: Response,
@@ -40,6 +42,29 @@ class AuthController {
       return res.status(200).json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // =========================
+  // Change Password
+  // =========================
+  async changePassword(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const result = await authService.changePassword(
+        req.user!.userId,
+        req.body
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: result.message,
       });
     } catch (error) {
       next(error);

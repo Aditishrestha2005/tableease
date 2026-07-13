@@ -3,14 +3,29 @@ import authController from "../controllers/auth.controller";
 import authMiddleware from "../middleware/auth.middleware";
 
 const router = Router();
+router.post(
+  "/register",
+  authController.register
+);
 
-// Register
-router.post("/register", authController.register);
 
-// Login
-router.post("/login", authController.login);
+router.post(
+  "/login",
+  authController.login
+);
 
-// Current User
-router.get("/me", authMiddleware, authController.getCurrentUser);
+
+router.get(
+  "/me",
+  authMiddleware,
+  authController.getCurrentUser
+);
+
+
+router.put(
+  "/change-password",
+  authMiddleware,
+  authController.changePassword
+);
 
 export default router;
