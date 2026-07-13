@@ -54,18 +54,28 @@ class ReservationRepository {
 }
 
 
-  async getActiveReservationsForTable(
-    tableId: string,
-    reservationDate: Date
-  ) {
-    return await Reservation.find({
-      table: tableId,
-      reservationDate,
-      status: {
-        $nin: ["Cancelled", "Completed"],
-      },
-    });
-  }
+async getActiveReservationsForTable(
+  tableId: string,
+  reservationDate: Date
+) {
+  return await Reservation.find({
+    table: tableId,
+    reservationDate,
+    status: {
+      $ne: "Cancelled",
+    },
+  });
 }
+
+async getActiveReservationsByUser(userId: string) {
+  return await Reservation.find({
+    user: userId,
+    status: {
+      $ne: "Cancelled",
+    },
+  });
+}
+}
+
 
 export default new ReservationRepository();

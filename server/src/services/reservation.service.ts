@@ -10,6 +10,7 @@ import {
   calculateEndTime,
   hasTimeConflict,
 } from "../utils/dateTime";
+const DEFAULT_RESERVATION_DURATION = 2;
 
 class ReservationService {
 
@@ -58,19 +59,23 @@ class ReservationService {
         validatedData.reservationTime
       );
 
+      
+
+
     // Prevent past booking
     if (reservationStart <= new Date()) {
       throw new Error(
         "Reservations cannot be made in the past."
       );
     }
+    
 
     // Calculate end time
     const reservationEnd =
-      calculateEndTime(
-        reservationStart,
-        2
-      );
+   calculateEndTime(
+  reservationStart,
+  DEFAULT_RESERVATION_DURATION
+);
 
     // Get active reservations
     const reservations =
@@ -78,6 +83,35 @@ class ReservationService {
         validatedData.table,
         validatedData.reservationDate
       );
+      const userReservations =
+  await reservationRepository.getActiveReservationsByUser(
+    userId
+  );
+
+for (const reservation of userReservations) {
+  const existingStart = combineDateAndTime(
+    reservation.reservationDate,
+    reservation.reservationTime
+  );
+
+  const existingEnd = calculateEndTime(
+    existingStart,
+    reservation.duration
+  );
+
+  if (
+    hasTimeConflict(
+      existingStart,
+      existingEnd,
+      reservationStart,
+      reservationEnd
+    )
+  ) {
+    throw new Error(
+      "You already have another reservation during this time."
+    );
+  }
+}
 
     // Check overlap
     for (const reservation of reservations) {
@@ -121,12 +155,12 @@ class ReservationService {
       reservationTime:
         validatedData.reservationTime,
 
-      duration: 2,
+      duration: DEFAULT_RESERVATION_DURATION,
 
       numberOfGuests:
         validatedData.numberOfGuests,
 
-      status: "Pending",
+      status: "Booked",
     });
   }
 
@@ -185,18 +219,25 @@ class ReservationService {
       );
     }
 
-    // Already completed
-    if (reservation.status === "Completed") {
-      throw new Error(
-        "Completed reservations cannot be cancelled."
-      );
-    }
 
     const reservationStart =
       combineDateAndTime(
         reservation.reservationDate,
         reservation.reservationTime
       );
+      const reservationHour = reservationStart.getHours();
+const reservationMinute = reservationStart.getMinutes();
+
+// Restaurant Hours
+if (
+  reservationHour < 9 ||
+  reservationHour > 20 ||
+  (reservationHour === 20 && reservationMinute > 0)
+) {
+  throw new Error(
+    "Reservations are only allowed between 09:00 and 20:00."
+  );
+}
 
     const currentTime = new Date();
 

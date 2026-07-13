@@ -13,7 +13,7 @@ export interface IReservation extends Document {
 
   numberOfGuests: number;
 
-  status: "Pending" | "Confirmed" | "Cancelled" | "Completed";
+  status: "Booked" | "Confirmed"| "Cancelled";
 
   createdAt: Date;
   updatedAt: Date;
@@ -57,12 +57,12 @@ const reservationSchema = new Schema<IReservation>(
     status: {
       type: String,
       enum: [
-        "Pending",
+        "Booked",
         "Confirmed",
         "Cancelled",
-        "Completed",
+        
       ],
-      default: "Pending",
+      default: "Booked",
     },
   },
   {
