@@ -21,7 +21,7 @@ class ProfileService {
     };
   }
 
-  
+
   async updateProfile(
     userId: string,
     data: {
@@ -74,6 +74,27 @@ class ProfileService {
       role: updatedUser.role,
       profileImage: updatedUser.profileImage,
       mfaEnabled: updatedUser.mfaEnabled,
+    };
+  }
+
+
+  async exportProfile(userId: string) {
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profileImage: user.profileImage,
+      mfaEnabled: user.mfaEnabled,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }

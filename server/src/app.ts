@@ -10,7 +10,9 @@ import profileRoutes from "./routes/profile.route";
 
 const app = express();
 
+
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (_req, res) => {
   res.status(200).json({
