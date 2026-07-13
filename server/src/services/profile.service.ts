@@ -4,7 +4,7 @@ import { updateProfileSchema } from "../validators/userProfile.validator";
 class ProfileService {
 
   async getProfile(userId: string) {
-   const user = await userRepository.findUserById(userId);
+    const user = await userRepository.findUserById(userId);
 
     if (!user) {
       throw new Error("User not found.");
@@ -21,7 +21,7 @@ class ProfileService {
     };
   }
 
-
+  
   async updateProfile(
     userId: string,
     data: {
@@ -34,6 +34,32 @@ class ProfileService {
     const updatedUser = await userRepository.updateUser(
       userId,
       validatedData
+    );
+
+    if (!updatedUser) {
+      throw new Error("User not found.");
+    }
+
+    return {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      role: updatedUser.role,
+      profileImage: updatedUser.profileImage,
+      mfaEnabled: updatedUser.mfaEnabled,
+    };
+  }
+
+  async updateProfileImage(
+    userId: string,
+    imagePath: string
+  ) {
+    const updatedUser = await userRepository.updateUser(
+      userId,
+      {
+        profileImage: imagePath,
+      }
     );
 
     if (!updatedUser) {
