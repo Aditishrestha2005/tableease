@@ -5,6 +5,7 @@ import authMiddleware, { AuthRequest } from "./middleware/auth.middleware";
 import roleMiddleware from "./middleware/role.middleware";
 import restaurantRoutes from "./routes/restaurant.route";
 import tableRoutes from "./routes/table.route";
+import reservationRoutes from "./routes/reservation.route";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.get("/", (_req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/restaurant", restaurantRoutes);
 app.use("/api/v1/tables", tableRoutes);
+app.use("/api/v1/reservations", reservationRoutes);
 
 
 app.get("/api/v1/protected", authMiddleware, (req: AuthRequest, res) => {
