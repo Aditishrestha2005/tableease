@@ -1,5 +1,6 @@
 import dashboardRepository from "../repositories/dashboard.repository";
 import reservationRepository from "../repositories/reservation.repository";
+import userRepository from "../repositories/user.repository";
 
 class DashboardService {
 
@@ -7,8 +8,13 @@ class DashboardService {
     return await dashboardRepository.getAdminDashboardStats();
   }
 
-
   async getUserDashboard(userId: string) {
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
     const reservations =
       await reservationRepository.getReservationsByUser(userId);
 
@@ -24,13 +30,19 @@ class DashboardService {
       (reservation) => reservation.status === "Cancelled"
     ).length;
 
-    return {
-      totalReservations: reservations.length,
-      bookedReservations,
-      confirmedReservations,
-      cancelledReservations,
-      recentReservations: reservations.slice(0, 5),
-    };
+ return {
+  welcomeMessage: `Welcome, ${user.name}!`,
+
+  totalReservations: reservations.length,
+
+  bookedReservations,
+
+  confirmedReservations,
+
+  cancelledReservations,
+
+  recentBookings: reservations.slice(0, 5),
+};
   }
 }
 
