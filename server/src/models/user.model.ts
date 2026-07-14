@@ -9,10 +9,12 @@ export interface IUser extends Document {
   role: "user" | "admin";
 
   profileImage?: string;
+  
+mfaEnabled: boolean;
 
-  mfaEnabled: boolean;
+mfaSecret?: string;
 
-  failedLoginAttempts: number;
+failedLoginAttempts: number;
 
   lockUntil?: Date;
 
@@ -64,6 +66,11 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+
+    mfaSecret: {
+  type: String,
+  default: "",
+},
 
     failedLoginAttempts: {
       type: Number,
