@@ -4,6 +4,7 @@ import userRepository from "../repositories/user.repository";
 import { verifyMfaSchema } from "../validators/mfa.validator";
 import generateToken from "../utils/generateToken";
 import { loginMfaSchema } from "../validators/loginMfa.validator";
+import activityLogService from "./activityLog.service";
 
 class MfaService {
 
@@ -59,11 +60,17 @@ class MfaService {
 
     user.mfaEnabled = true;
     await user.save();
-
+ 
+    await activityLogService.logActivity(
+  String(user._id),
+  "MFA_ENABLED",
+  "User enabled multi-factor authentication."
+);
     return {
       message: "MFA enabled successfully.",
     };
   }
+  
     async verifyLoginMfa(
     email: string,
     token: string

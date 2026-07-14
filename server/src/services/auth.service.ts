@@ -209,6 +209,11 @@ return {
     }
 
     await user.save();
+    await activityLogService.logActivity(
+  String(user._id),
+  "PASSWORD_CHANGED",
+  "User changed password successfully."
+);
 
     return {
       message: "Password changed successfully.",
