@@ -21,11 +21,15 @@ class AuthController {
     try {
       const result = await authService.loginUser(req.body);
 
-      return res.status(200).json({
-        success: true,
-        message: "Login successful.",
-        data: result,
-      });
+    return res.status(200).json({
+  success: true,
+  message: result.passwordExpired
+    ? "Password change required."
+    : result.mfaRequired
+    ? "MFA verification required."
+    : "Login successful.",
+  data: result,
+});
     } catch (error) {
       next(error);
     }

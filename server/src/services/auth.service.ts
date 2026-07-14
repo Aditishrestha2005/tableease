@@ -74,25 +74,40 @@ class AuthService {
       validatedData.password,
       user.password
     );
+if (!passwordMatch) {
+  user.failedLoginAttempts += 1;
 
-    if (!passwordMatch) {
-      user.failedLoginAttempts += 1;
+  if (user.failedLoginAttempts >= 5) {
+    user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+  }
 
-      if (user.failedLoginAttempts >= 5) {
-        user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-      }
+  await user.save();
 
-      await user.save();
-    await activityLogService.logActivity(
-  String(user._id),
-  "LOGIN_FAILED",
-  "Failed login attempt."
-);
+  await activityLogService.logActivity(
+    String(user._id),
+    "LOGIN_FAILED",
+    "Failed login attempt."
+  );
 
-      throw new Error("Invalid email or password.");
-    }
+  throw new Error("Invalid email or password.");
+}
 
-   user.failedLoginAttempts = 0;
+// ✅ Password Expiry Check (90 days)
+// Password Expiry Check (90 days)
+const ninetyDays = 90 * 24 * 60 * 60 * 1000;
+
+if (
+  user.passwordChangedAt &&
+  Date.now() - user.passwordChangedAt.getTime() > ninetyDays
+) {
+  return {
+    passwordExpired: true,
+    email: user.email,
+  };
+}
+
+// Reset failed login attempts after successful login
+user.failedLoginAttempts = 0;
 user.lockUntil = undefined;
 
 await user.save();
@@ -199,9 +214,11 @@ return {
       12
     );
 
-    user.password = hashedPassword;
+   user.password = hashedPassword;
 
-    user.passwordHistory.push(hashedPassword);
+user.passwordChangedAt = new Date();
+
+user.passwordHistory.push(hashedPassword);
 
     if (user.passwordHistory.length > 5) {
       user.passwordHistory =
