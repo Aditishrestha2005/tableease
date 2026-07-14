@@ -23,6 +23,28 @@ class MfaController {
       next(error);
     }
   }
+  
+  async verifyMfa(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { token } = req.body;
+
+      const result = await mfaService.verifyMfa(
+        req.user!.userId,
+        token
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new MfaController();

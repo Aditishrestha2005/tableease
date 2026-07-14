@@ -8,6 +8,7 @@ import tableRoutes from "./routes/table.route";
 import reservationRoutes from "./routes/reservation.route";
 import profileRoutes from "./routes/profile.route";
 import dashboardRoutes from "./routes/dashboard.route";
+import mfaRoutes from "./routes/mfa.route";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/v1/tables", tableRoutes);
 app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/mfa", mfaRoutes);
 
 
 app.get("/api/v1/protected", authMiddleware, (req: AuthRequest, res) => {
