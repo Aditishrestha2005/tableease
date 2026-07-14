@@ -6,6 +6,7 @@ import {
 } from "../validators/auth.validator";
 import { changePasswordSchema } from "../validators/changePassword.validator";
 import generateToken from "../utils/generateToken";
+import activityLogService from "./activityLog.service";
 
 class AuthService {
   async registerUser(userData: {
@@ -31,6 +32,11 @@ class AuthService {
       password: hashedPassword,
       passwordHistory: [hashedPassword],
     });
+    await activityLogService.logActivity(
+  String(newUser._id),
+  "REGISTER",
+  "User registered successfully."
+);
 
     const token = generateToken(String(newUser._id), newUser.role);
 
@@ -77,6 +83,11 @@ class AuthService {
       }
 
       await user.save();
+    await activityLogService.logActivity(
+  String(user._id),
+  "LOGIN_FAILED",
+  "Failed login attempt."
+);
 
       throw new Error("Invalid email or password.");
     }
@@ -85,6 +96,12 @@ class AuthService {
 user.lockUntil = undefined;
 
 await user.save();
+
+await activityLogService.logActivity(
+  String(user._id),
+  "LOGIN_SUCCESS",
+  "User logged in successfully."
+);
 
 // If MFA is enabled, require OTP before issuing JWT
 if (user.mfaEnabled) {
