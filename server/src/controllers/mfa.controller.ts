@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware";
 import mfaService from "../services/mfa.service";
 
@@ -40,6 +40,29 @@ class MfaController {
       return res.status(200).json({
         success: true,
         message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+   
+  async verifyLoginMfa(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { email, token } = req.body;
+
+      const result = await mfaService.verifyLoginMfa(
+        email,
+        token
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful.",
+        data: result,
       });
     } catch (error) {
       next(error);

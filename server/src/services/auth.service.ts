@@ -81,23 +81,31 @@ class AuthService {
       throw new Error("Invalid email or password.");
     }
 
-    user.failedLoginAttempts = 0;
-    user.lockUntil = undefined;
+   user.failedLoginAttempts = 0;
+user.lockUntil = undefined;
 
-    await user.save();
+await user.save();
 
-    const token = generateToken(String(user._id), user.role);
+// If MFA is enabled, require OTP before issuing JWT
+if (user.mfaEnabled) {
+  return {
+    mfaRequired: true,
+    email: user.email,
+  };
+}
 
-    return {
-      user: {
-        id: String(user._id),
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-      },
-      token,
-    };
+const token = generateToken(String(user._id), user.role);
+
+return {
+  user: {
+    id: String(user._id),
+    name: user.name,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    role: user.role,
+  },
+  token,
+};
   }
 
   async getCurrentUser(userId: string) {

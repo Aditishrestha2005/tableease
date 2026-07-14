@@ -10,6 +10,10 @@ router.post(
   authMiddleware,
   mfaController.generateMfa
 );
+router.post(
+  "/login",
+  mfaController.verifyLoginMfa
+);
 
 // Verify MFA OTP
 router.post(
