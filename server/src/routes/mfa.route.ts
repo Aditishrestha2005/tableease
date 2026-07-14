@@ -1,6 +1,7 @@
 import { Router } from "express";
 import mfaController from "../controllers/mfa.controller";
 import authMiddleware from "../middleware/auth.middleware";
+import { authLimiter } from "../middleware/rateLimit.middleware";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.post(
 );
 router.post(
   "/login",
+  authLimiter,
   mfaController.verifyLoginMfa
 );
 
