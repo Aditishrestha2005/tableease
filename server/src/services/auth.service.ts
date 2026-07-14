@@ -52,10 +52,11 @@ class AuthService {
     };
   }
 
-  async loginUser(userData: {
-    email: string;
-    password: string;
-  }) {
+ async loginUser(userData: {
+  email: string;
+  password: string;
+  captchaToken?: string;
+}) {
     const validatedData = loginSchema.parse(userData);
 
     const user = await userRepository.findUserByEmail(validatedData.email);
