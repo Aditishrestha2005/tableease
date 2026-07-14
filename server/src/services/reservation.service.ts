@@ -10,6 +10,8 @@ import {
   calculateEndTime,
   hasTimeConflict,
 } from "../utils/dateTime";
+import activityLogService from "./activityLog.service";
+
 const DEFAULT_RESERVATION_DURATION = 2;
 
 class ReservationService {
@@ -142,34 +144,42 @@ for (const reservation of userReservations) {
     }
 
     // Create reservation
-    return await reservationRepository.createReservation({
-      user: new mongoose.Types.ObjectId(userId),
+    const reservation =
+  await reservationRepository.createReservation({
+    user: new mongoose.Types.ObjectId(userId),
 
-      table: new mongoose.Types.ObjectId(
-        validatedData.table
-      ),
+    table: new mongoose.Types.ObjectId(
+      validatedData.table
+    ),
 
-      reservationDate:
-        validatedData.reservationDate,
+    reservationDate:
+      validatedData.reservationDate,
 
-      reservationTime:
-        validatedData.reservationTime,
+    reservationTime:
+      validatedData.reservationTime,
 
-      duration: DEFAULT_RESERVATION_DURATION,
+    duration: DEFAULT_RESERVATION_DURATION,
 
-      numberOfGuests:
-        validatedData.numberOfGuests,
+    numberOfGuests:
+      validatedData.numberOfGuests,
 
-      status: "Booked",
-    });
+    status: "Booked",
+  });
+
+await activityLogService.logActivity(
+  userId,
+  "RESERVATION_CREATED",
+  "User created a reservation."
+);
+
+return reservation;
+
   }
-
-  async getMyReservations(userId: string) {
-    return await reservationRepository.getReservationsByUser(
-      userId
-    );
-  }
-
+async getMyReservations(userId: string) {
+  return await reservationRepository.getReservationsByUser(
+    userId
+  );
+}
 
   async getAllReservations() {
     return await reservationRepository.getAllReservations();
@@ -255,18 +265,24 @@ if (
     }
 
     // Cancel reservation
-    const updatedReservation =
-      await reservationRepository.updateReservation(
-        reservationId,
-        {
-          status: "Cancelled",
-        }
-      );
+const updatedReservation =
+  await reservationRepository.updateReservation(
+    reservationId,
+    {
+      status: "Cancelled",
+    }
+  );
 
-    return {
-      message: "Reservation cancelled successfully.",
-      reservation: updatedReservation,
-    };
+await activityLogService.logActivity(
+  userId,
+  "RESERVATION_CANCELLED",
+  "User cancelled a reservation."
+);
+
+return {
+  message: "Reservation cancelled successfully.",
+  reservation: updatedReservation,
+};
   }
 }
 

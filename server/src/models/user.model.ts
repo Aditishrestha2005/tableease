@@ -19,6 +19,7 @@ failedLoginAttempts: number;
   lockUntil?: Date;
 
   passwordHistory: string[];
+  passwordChangedAt: Date;
 
   createdAt: Date;
   updatedAt: Date;
@@ -85,6 +86,10 @@ const userSchema = new Schema<IUser>(
       type: [String],
       default: [],
     },
+    passwordChangedAt: {
+  type: Date,
+  default: Date.now,
+},
   },
   {
     timestamps: true,

@@ -1,5 +1,6 @@
 import userRepository from "../repositories/user.repository";
 import { updateProfileSchema } from "../validators/userProfile.validator";
+import activityLogService from "./activityLog.service";
 
 class ProfileService {
 
@@ -39,6 +40,11 @@ class ProfileService {
     if (!updatedUser) {
       throw new Error("User not found.");
     }
+    await activityLogService.logActivity(
+  userId,
+  "PROFILE_UPDATED",
+  "User updated their profile."
+);
 
     return {
       id: updatedUser.id,
@@ -65,6 +71,11 @@ class ProfileService {
     if (!updatedUser) {
       throw new Error("User not found.");
     }
+await activityLogService.logActivity(
+  userId,
+  "PROFILE_IMAGE_UPDATED",
+  "User updated their profile image."
+);
 
     return {
       id: updatedUser.id,
