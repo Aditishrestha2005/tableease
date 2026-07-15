@@ -5,19 +5,13 @@ import roleMiddleware from "../middleware/role.middleware";
 
 const router = Router();
 
-// =========================
-// Public Routes
-// =========================
-
 // View all tables
 router.get("/", tableController.getAllTables);
 
 // View a specific table
 router.get("/:id", tableController.getTableById);
 
-// =========================
-// Admin Routes
-// =========================
+
 
 // Create table
 router.post(

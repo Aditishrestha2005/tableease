@@ -1,4 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import {
+  NextFunction,
+  Request,
+  Response,
+} from "express";
+import { ParamsDictionary } from "express-serve-static-core";
 import jwt from "jsonwebtoken";
 
 interface JwtPayload {
@@ -6,7 +11,9 @@ interface JwtPayload {
   role: "user" | "admin";
 }
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<
+  P = ParamsDictionary
+> extends Request<P> {
   user?: JwtPayload;
 }
 

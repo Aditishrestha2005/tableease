@@ -1,15 +1,18 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
+import { AuthRequest } from "../middleware/auth.middleware";
 import tableService from "../services/table.service";
 
 class TableController {
-
   async createTable(
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const result = await tableService.createTable(req.body);
+      const result = await tableService.createTable(
+        req.user!.userId,
+        req.body
+      );
 
       return res.status(201).json({
         success: true,
@@ -21,9 +24,8 @@ class TableController {
     }
   }
 
-
   async getAllTables(
-    _req: Request,
+    _req: AuthRequest,
     res: Response,
     next: NextFunction
   ) {
@@ -39,9 +41,8 @@ class TableController {
     }
   }
 
-
   async getTableById(
-    req: Request<{ id: string }>,
+    req: AuthRequest<{ id: string }>,
     res: Response,
     next: NextFunction
   ) {
@@ -60,12 +61,13 @@ class TableController {
   }
 
   async updateTable(
-    req: Request<{ id: string }>,
+    req: AuthRequest<{ id: string }>,
     res: Response,
     next: NextFunction
   ) {
     try {
       const result = await tableService.updateTable(
+        req.user!.userId,
         String(req.params.id),
         req.body
       );
@@ -80,14 +82,14 @@ class TableController {
     }
   }
 
-
   async deleteTable(
-    req: Request<{ id: string }>,
+    req: AuthRequest<{ id: string }>,
     res: Response,
     next: NextFunction
   ) {
     try {
       const result = await tableService.deleteTable(
+        req.user!.userId,
         String(req.params.id)
       );
 

@@ -33,7 +33,7 @@ class TableService {
 await activityLogService.logActivity(
   userId,
   "TABLE_CREATED",
-  "Administrator created a table."
+  "Administrator created table."
 );
 
 return table;
@@ -96,7 +96,6 @@ return table;
 
 return updatedTable;
 
-    return updatedTable;
   }
 
  async deleteTable(
@@ -112,7 +111,7 @@ return updatedTable;
   await activityLogService.logActivity(
     userId,
     "TABLE_DELETED",
-    "Administrator deleted a table."
+    "Administrator deleted  table."
   );
 
   return {
