@@ -8,6 +8,7 @@ import { changePasswordSchema } from "../validators/changePassword.validator";
 import generateToken from "../utils/generateToken";
 import activityLogService from "./activityLog.service";
 import captchaService from "./captcha.service";
+
 class AuthService {
   async registerUser(userData: {
     name: string;

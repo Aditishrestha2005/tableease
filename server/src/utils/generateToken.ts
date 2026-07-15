@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 const generateToken = (userId: string, role: string): string => {
   return jwt.sign(
@@ -8,7 +8,8 @@ const generateToken = (userId: string, role: string): string => {
     },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: "1d",
+      expiresIn:
+  (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) || "1d",
     }
   );
 };

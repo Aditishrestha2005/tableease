@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.route";
 import errorHandler from "./middleware/error.middleware";
 import authMiddleware, { AuthRequest } from "./middleware/auth.middleware";
@@ -14,6 +15,7 @@ const app = express();
 
 
 app.use(express.json());
+app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (_req, res) => {
