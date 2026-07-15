@@ -3,10 +3,14 @@ import {
   tableSchema,
   updateTableSchema,
 } from "../validators/table.validator";
+import activityLogService from "./activityLog.service";
+
 
 class TableService {
 
-  async createTable(data: {
+  async createTable(
+  userId: string,
+  data: {
     tableNumber: number;
     capacity: number;
     location: "Indoor" | "Outdoor" | "VIP";
@@ -23,7 +27,16 @@ class TableService {
       throw new Error("Table number already exists.");
     }
 
-    return await tableRepository.createTable(validatedData);
+    const table =
+  await tableRepository.createTable(validatedData);
+
+await activityLogService.logActivity(
+  userId,
+  "TABLE_CREATED",
+  "Administrator created a table."
+);
+
+return table;
   }
 
   async getAllTables() {
@@ -40,8 +53,9 @@ class TableService {
   }
 
   async updateTable(
-    id: string,
-    data: {
+  userId: string,
+  id: string,
+  data: {
       tableNumber?: number;
       capacity?: number;
       location?: "Indoor" | "Outdoor" | "VIP";
@@ -74,20 +88,36 @@ class TableService {
       throw new Error("Table not found.");
     }
 
+    await activityLogService.logActivity(
+  userId,
+  "TABLE_UPDATED",
+  "Administrator updated table information."
+);
+
+return updatedTable;
+
     return updatedTable;
   }
 
-  async deleteTable(id: string) {
-    const table = await tableRepository.deleteTable(id);
+ async deleteTable(
+  userId: string,
+  id: string
+) {
+  const table = await tableRepository.deleteTable(id);
 
-    if (!table) {
-      throw new Error("Table not found.");
-    }
-
-    return {
-      message: "Table deleted successfully.",
-    };
+  if (!table) {
+    throw new Error("Table not found.");
   }
-}
 
+  await activityLogService.logActivity(
+    userId,
+    "TABLE_DELETED",
+    "Administrator deleted a table."
+  );
+
+  return {
+    message: "Table deleted successfully.",
+  };
+}
+}
 export default new TableService();

@@ -1,8 +1,11 @@
 import restaurantRepository from "../repositories/restaurant.repository";
 import { restaurantSchema } from "../validators/restaurant.validator";
+import activityLogService from "./activityLog.service";
 
 class RestaurantService {
-  async createRestaurant(data: {
+  async createRestaurant(
+  userId: string,
+  data: {
     name: string;
     description: string;
     address: string;
@@ -21,7 +24,18 @@ class RestaurantService {
       throw new Error("Restaurant already exists.");
     }
 
-    return await restaurantRepository.createRestaurant(validatedData);
+    const restaurant =
+  await restaurantRepository.createRestaurant(
+    validatedData
+  );
+
+await activityLogService.logActivity(
+  userId,
+  "RESTAURANT_CREATED",
+  "Admin created restaurant."
+);
+
+return restaurant;
   }
 
 
@@ -35,7 +49,9 @@ class RestaurantService {
     return restaurant;
   }
 
-  async updateRestaurant(data: {
+  async updateRestaurant(
+  userId: string,
+  data: {
     name?: string;
     description?: string;
     address?: string;
@@ -51,7 +67,13 @@ class RestaurantService {
       throw new Error("Restaurant not found.");
     }
 
-    return restaurant;
+    await activityLogService.logActivity(
+  userId,
+  "RESTAURANT_UPDATED",
+  "Admin updated restaurant."
+);
+
+return restaurant;
   }
 }
 

@@ -1,17 +1,19 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
+import { AuthRequest } from "../middleware/auth.middleware";
 import restaurantService from "../services/restaurant.service";
 
 class RestaurantController {
-  // =========================
-  // Create Restaurant (Only Once)
-  // =========================
-  async createRestaurant(
-    req: Request,
+async createRestaurant(
+  req: AuthRequest,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const result = await restaurantService.createRestaurant(req.body);
+      const result =
+  await restaurantService.createRestaurant(
+    req.user!.userId,
+    req.body
+  );
 
       return res.status(201).json({
         success: true,
@@ -23,11 +25,9 @@ class RestaurantController {
     }
   }
 
-  // =========================
-  // Get Restaurant
-  // =========================
+
   async getRestaurant(
-    _req: Request,
+    _req: AuthRequest,
     res: Response,
     next: NextFunction
   ) {
@@ -43,16 +43,17 @@ class RestaurantController {
     }
   }
 
-  // =========================
-  // Update Restaurant
-  // =========================
-  async updateRestaurant(
-    req: Request,
+async updateRestaurant(
+  req: AuthRequest,
     res: Response,
     next: NextFunction
   ) {
     try {
-      const result = await restaurantService.updateRestaurant(req.body);
+     const result =
+  await restaurantService.updateRestaurant(
+    req.user!.userId,
+    req.body
+  );
 
       return res.status(200).json({
         success: true,
