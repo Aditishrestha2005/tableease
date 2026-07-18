@@ -10,8 +10,17 @@ import reservationRoutes from "./routes/reservation.route";
 import profileRoutes from "./routes/profile.route";
 import dashboardRoutes from "./routes/dashboard.route";
 import mfaRoutes from "./routes/mfa.route";
+import cors from "cors";
+import paymentRoutes from "./routes/payment.routes";
+import userRoutes from "./routes/user.route";
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 
 app.use(express.json());
@@ -33,7 +42,8 @@ app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/mfa", mfaRoutes);
-
+app.use("/api/v1/payment", paymentRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.get("/api/v1/protected", authMiddleware, (req: AuthRequest, res) => {
   res.status(200).json({

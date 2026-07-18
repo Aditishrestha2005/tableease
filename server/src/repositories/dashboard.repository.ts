@@ -9,10 +9,10 @@ class DashboardRepository {
       totalTables,
       totalReservations,
       bookedReservations,
-      confirmedReservations,
       cancelledReservations,
       availableTables,
-      maintenanceTables,
+      recentUsers,
+      recentReservations,
     ] = await Promise.all([
       User.countDocuments(),
 
@@ -25,10 +25,6 @@ class DashboardRepository {
       }),
 
       Reservation.countDocuments({
-        status: "Confirmed",
-      }),
-
-      Reservation.countDocuments({
         status: "Cancelled",
       }),
 
@@ -36,9 +32,16 @@ class DashboardRepository {
         status: "available",
       }),
 
-      Table.countDocuments({
-        status: "maintenance",
-      }),
+      User.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("name email createdAt"),
+
+      Reservation.find()
+        .populate("user", "name")
+        .populate("table", "tableNumber")
+        .sort({ createdAt: -1 })
+        .limit(5),
     ]);
 
     return {
@@ -46,10 +49,11 @@ class DashboardRepository {
       totalTables,
       totalReservations,
       bookedReservations,
-      confirmedReservations,
       cancelledReservations,
       availableTables,
-      maintenanceTables,
+
+      recentUsers,
+      recentReservations,
     };
   }
 }

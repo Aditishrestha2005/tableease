@@ -8,6 +8,12 @@ import { changePasswordSchema } from "../validators/changePassword.validator";
 import generateToken from "../utils/generateToken";
 import activityLogService from "./activityLog.service";
 import captchaService from "./captcha.service";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../config/email";
+
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const CLIENT_URL = process.env.CLIENT_URL!;
 
 class AuthService {
   async registerUser(userData: {
@@ -238,6 +244,66 @@ user.passwordHistory.push(hashedPassword);
       message: "Password changed successfully.",
     };
   }
+  async sendResetPasswordEmail(email?: string) {
+  if (!email) {
+    throw new Error("Email is required.");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = await userRepository.findUserByEmail(normalizedEmail);
+  console.log("User found:", user);
+  // Don't reveal whether the email exists
+  if (!user) {
+    return true;
+  }
+
+  const token = jwt.sign(
+    { id: user._id },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+
+  const resetLink = `${CLIENT_URL}/reset-password?token=${token}`;
+
+  const html = `
+    <p>Click the link below to reset your password. This link is valid for 1 hour.</p>
+    <a href="${resetLink}">${resetLink}</a>
+  `;
+
+  await sendEmail(user.email, "Reset Your Password", html);
+
+  return true;
+}
+async resetPassword(token?: string, newPassword?: string) {
+  if (!token || !newPassword) {
+    throw new Error("Token and new password are required.");
+  }
+
+  const user = jwt.verify(token, JWT_SECRET) as { id: string };
+
+  const existingUser = await userRepository.findUserById(user.id);
+
+  if (!existingUser) {
+    throw new Error("User not found.");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  existingUser.password = hashedPassword;
+  existingUser.passwordChangedAt = new Date();
+
+  existingUser.passwordHistory.push(hashedPassword);
+
+  if (existingUser.passwordHistory.length > 5) {
+    existingUser.passwordHistory =
+      existingUser.passwordHistory.slice(-5);
+  }
+
+  await existingUser.save();
+
+  return true;
+}
 }
 
 export default new AuthService();

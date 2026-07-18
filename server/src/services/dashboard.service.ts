@@ -22,9 +22,6 @@ class DashboardService {
       (reservation) => reservation.status === "Booked"
     ).length;
 
-    const confirmedReservations = reservations.filter(
-      (reservation) => reservation.status === "Confirmed"
-    ).length;
 
     const cancelledReservations = reservations.filter(
       (reservation) => reservation.status === "Cancelled"
@@ -37,7 +34,6 @@ class DashboardService {
 
   bookedReservations,
 
-  confirmedReservations,
 
   cancelledReservations,
 

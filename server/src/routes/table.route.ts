@@ -8,6 +8,11 @@ const router = Router();
 // View all tables
 router.get("/", tableController.getAllTables);
 
+router.get(
+  "/available",
+  tableController.getAvailableTables
+);
+
 // View a specific table
 router.get("/:id", tableController.getTableById);
 

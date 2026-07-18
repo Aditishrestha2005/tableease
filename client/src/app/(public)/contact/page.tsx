@@ -1,13 +1,10 @@
 "use client";
 
-import Navbar from "../_components/Navbar";
-import Footer from "../_components/Footer";
+
 
 export default function ContactPage() {
   return (
     <>
-      <Navbar />
-
       {/* Main container in unified solid white */}
       <main className="bg-white pt-16">
         
@@ -121,7 +118,7 @@ export default function ContactPage() {
         </section>
       </main>
 
-      <Footer />
+   
     </>
   );
 }

@@ -1,5 +1,3 @@
-import Navbar from "../_components/Navbar";
-import Footer from "../_components/Footer";
 import { ShieldCheck, Leaf, Heart, Award } from "lucide-react";
 
 export default function AboutPage() {
@@ -12,7 +10,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <Navbar />
+    
 
       <main className="bg-white">
         
@@ -166,7 +164,7 @@ export default function AboutPage() {
 
       </main>
 
-      <Footer />
+     
     </>
   );
 }

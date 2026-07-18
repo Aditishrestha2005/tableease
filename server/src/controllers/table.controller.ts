@@ -101,6 +101,34 @@ class TableController {
       next(error);
     }
   }
+
+  async getAvailableTables(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { date, time, guests } = req.query as {
+        date: string;
+        time: string;
+        guests: string;
+      };
+
+      const result =
+        await tableService.getAvailableTables(
+          date,
+          time,
+          Number(guests)
+        );
+
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new TableController();

@@ -4,6 +4,7 @@ import {
   updateTableSchema,
 } from "../validators/table.validator";
 import activityLogService from "./activityLog.service";
+import availabilityService from "./availability.service";
 
 
 class TableService {
@@ -117,6 +118,18 @@ return updatedTable;
   return {
     message: "Table deleted successfully.",
   };
+}
+
+async getAvailableTables(
+  date: string,
+  time: string,
+  guests: number
+) {
+  return await availabilityService.getAvailableTables(
+    date,
+    time,
+    guests
+  );
 }
 }
 export default new TableService();

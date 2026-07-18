@@ -18,6 +18,12 @@ class UserRepository {
       new: true,
     });
   }
+  async getAllUsers() {
+  return await User.find()
+    .select("name email phoneNumber role createdAt")
+    .sort({ createdAt: -1 });
 }
+}
+
 
 export default new UserRepository();

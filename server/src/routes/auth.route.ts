@@ -30,4 +30,15 @@ router.put(
   authController.changePassword
 );
 
+router.post(
+  "/forgot-password",
+  authController.sendResetPasswordEmail
+);
+
+router.post(
+  "/reset-password/:token",
+  authController.resetPassword
+);
+
+
 export default router;

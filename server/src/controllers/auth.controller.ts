@@ -35,26 +35,28 @@ class AuthController {
     }
   }
 
-  async getCurrentUser(
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ) {
-    try {
-      const result = await authService.getCurrentUser(req.user!.userId);
+async getCurrentUser(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    console.log("Decoded user from JWT:", req.user);
 
-      return res.status(200).json({
-        success: true,
-        data: result,
-      });
-    } catch (error) {
-      next(error);
-    }
+    const result = await authService.getCurrentUser(req.user!.userId);
+
+    console.log("User returned from service:", result);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("getCurrentUser Error:", error);
+    next(error);
   }
+}
 
-  // =========================
-  // Change Password
-  // =========================
   async changePassword(
     req: AuthRequest,
     res: Response,
@@ -74,6 +76,43 @@ class AuthController {
       next(error);
     }
   }
+  async sendResetPasswordEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await authService.sendResetPasswordEmail(req.body.email);
+
+    return res.status(200).json({
+      success: true,
+      message: "If the email is registered, a reset link has been sent.",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+  const token = String(req.params.token);
+const newPassword = String(req.body.newPassword);
+
+await authService.resetPassword(token, newPassword);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 export default new AuthController();
