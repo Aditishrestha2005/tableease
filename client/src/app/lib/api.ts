@@ -30,6 +30,7 @@ export async function registerUser(data: RegisterData) {
 interface LoginData {
   email: string;
   password: string;
+  captchaToken?: string;
 }
 
 export async function loginUser(data: LoginData) {
@@ -64,6 +65,34 @@ export async function getCurrentUser() {
 
   if (!response.ok) {
     throw new Error(result.message || "Unauthorized");
+  }
+
+  return result;
+}
+interface VerifyMfaData {
+  email: string;
+  token: string;
+}
+
+export async function verifyLoginMfa(
+  data: VerifyMfaData
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/mfa/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "MFA verification failed.");
   }
 
   return result;
@@ -294,6 +323,150 @@ export async function getAllUsers() {
 
   if (!response.ok) {
     throw new Error(result.message || "Failed to fetch users.");
+  }
+
+  return result;
+}
+export async function getProfile() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch profile.");
+  }
+
+  return result;
+}
+interface UpdateProfileData {
+  name: string;
+  phoneNumber: string;
+}
+
+export async function updateProfile(
+  data: UpdateProfileData
+) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to update profile.");
+  }
+
+  return result;
+}
+export async function uploadProfileImage(file: File) {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("profileImage", file);
+
+  const response = await fetch(`${API_BASE_URL}/profile/image`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to upload image.");
+  }
+
+  return result;
+}
+export async function exportProfile() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/profile/export`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to export profile.");
+  }
+
+  return await response.blob();
+}
+export async function importProfile(data: {
+  name: string;
+  phoneNumber: string;
+}) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/profile/import`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to import profile.");
+  }
+
+  return result;
+}
+export async function deleteUser(id: string) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to delete user.");
+  }
+
+  return result;
+}
+export async function getUserDetails(id: string) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_BASE_URL}/users/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to fetch user details."
+    );
   }
 
   return result;

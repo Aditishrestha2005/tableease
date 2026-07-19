@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../../lib/api";
+import {
+  getAllUsers,
+  deleteUser,
+  getUserDetails,
+} from "../../lib/api";
 
 interface User {
   _id: string;
@@ -9,6 +13,7 @@ interface User {
   email: string;
   phoneNumber: string;
   role: string;
+  profileImage?: string;
   createdAt: string;
 }
 
@@ -16,10 +21,14 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userReservations, setUserReservations] = useState<any[]>([]);
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const result = await getAllUsers();
+        console.log(result.data);
         setUsers(result.data);
       } catch (error) {
         console.error(error);
@@ -30,6 +39,35 @@ export default function UsersPage() {
 
     fetchUsers();
   }, []);
+const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+const handleDeleteUser = async () => {
+  if (!userToDelete) return;
+
+  try {
+    await deleteUser(userToDelete._id);
+
+    setUsers((prev) =>
+      prev.filter((user) => user._id !== userToDelete._id)
+    );
+
+    setUserToDelete(null);
+  } catch (error) {
+    console.error(error);
+
+    setUserToDelete(null);
+  }
+};
+const handleViewUser = async (user: User) => {
+  try {
+    const result = await getUserDetails(user._id);
+
+    setSelectedUser(result.data.user);
+    setUserReservations(result.data.reservations);
+  } catch (error) {
+    console.error(error);
+  }
+};
   const filteredUsers = users.filter(
   (user) =>
     user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -147,13 +185,19 @@ export default function UsersPage() {
                     {/* Actions */}
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <button className="rounded-md bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-100">
-                          👁 View
-                        </button>
+                       <button
+ onClick={() => handleViewUser(user)}
+  className="rounded-md bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-100"
+>
+  👁 View
+</button>
 
-                        <button className="rounded-md bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100">
-                          🗑 Delete
-                        </button>
+                       <button
+  onClick={() => setUserToDelete(user)}
+  className="rounded-md bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
+>
+  🗑 Delete
+</button>
                       </div>
                     </td>
                   </tr>
@@ -163,6 +207,123 @@ export default function UsersPage() {
           </tbody>
         </table>
       </div>
+      {/* View User Modal */}
+{selectedUser && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+
+      {/* Title */}
+      <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
+        User Details
+      </h2>
+
+      {/* Profile Picture */}
+      <div className="mb-6 flex justify-center">
+        {selectedUser.profileImage ? (
+         <img
+  src={`http://localhost:5050/${selectedUser.profileImage}`}
+  alt={selectedUser.name}
+  className="h-28 w-28 rounded-full object-cover border-4 border-orange-100"
+/>
+        ) : (
+          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-orange-100 text-3xl font-bold text-orange-600">
+            {selectedUser.name
+              .split(" ")
+              .map((word) => word[0])
+              .join("")
+              .toUpperCase()}
+          </div>
+        )}
+      </div>
+
+      {/* Name */}
+      <h3 className="text-center text-xl font-semibold text-gray-900">
+        {selectedUser.name}
+      </h3>
+
+      {/* Role */}
+      <div className="mt-2 flex justify-center">
+        <span
+          className={`rounded-full px-3 py-1 text-sm font-medium ${
+            selectedUser.role === "admin"
+              ? "bg-red-100 text-red-700"
+              : "bg-blue-100 text-blue-700"
+          }`}
+        >
+          {selectedUser.role}
+        </span>
+      </div>
+
+      {/* Information */}
+      <div className="mt-8 space-y-4">
+
+        <div className="flex justify-between border-b pb-2">
+          <span className="font-medium text-gray-600">Email</span>
+          <span className="text-gray-900">
+            {selectedUser.email}
+          </span>
+        </div>
+
+        <div className="flex justify-between border-b pb-2">
+          <span className="font-medium text-gray-600">Phone</span>
+          <span className="text-gray-900">
+            {selectedUser.phoneNumber}
+          </span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="font-medium text-gray-600">Joined</span>
+          <span className="text-gray-900">
+            {new Date(selectedUser.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+
+      </div>
+
+      {/* Close */}
+      <button
+        onClick={() => setSelectedUser(null)}
+        className="mt-8 w-full rounded-lg bg-orange-500 py-3 font-medium text-white hover:bg-orange-600"
+      >
+        Close
+      </button>
+
+    </div>
+  </div>
+)}
+{userToDelete && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+      <h2 className="text-2xl font-bold text-gray-900">
+        Delete User
+      </h2>
+
+      <p className="mt-4 text-gray-600">
+        Are you sure you want to permanently delete{" "}
+        <span className="font-semibold text-red-600">
+          {userToDelete.name}
+        </span>
+        ?
+      </p>
+
+      <div className="mt-8 flex justify-end gap-3">
+      <button
+  onClick={() => setUserToDelete(null)}
+  className="rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 hover:bg-gray-100"
+>
+  Cancel
+</button>
+
+        <button
+          onClick={handleDeleteUser}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

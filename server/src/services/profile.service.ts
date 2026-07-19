@@ -108,6 +108,44 @@ await activityLogService.logActivity(
       updatedAt: user.updatedAt,
     };
   }
+  async importProfile(
+  userId: string,
+  data: {
+    name: string;
+    phoneNumber: string;
+  }
+) {
+  // Only allow safe fields to be imported
+  const validatedData = updateProfileSchema.parse({
+    name: data.name,
+    phoneNumber: data.phoneNumber,
+  });
+
+  const updatedUser = await userRepository.updateUser(
+    userId,
+    validatedData
+  );
+
+  if (!updatedUser) {
+    throw new Error("User not found.");
+  }
+
+  await activityLogService.logActivity(
+    userId,
+    "PROFILE_IMPORTED",
+    "User imported their profile data."
+  );
+
+  return {
+    id: updatedUser.id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    phoneNumber: updatedUser.phoneNumber,
+    role: updatedUser.role,
+    profileImage: updatedUser.profileImage,
+    mfaEnabled: updatedUser.mfaEnabled,
+  };
+}
 }
 
 export default new ProfileService();

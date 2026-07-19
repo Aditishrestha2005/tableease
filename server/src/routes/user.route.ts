@@ -11,5 +11,17 @@ router.get(
   roleMiddleware("admin"),
   userController.getAllUsers
 );
+router.get(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  userController.getUserDetails
+);
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("admin"),
+  userController.deleteUser
+);
 
 export default router;

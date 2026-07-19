@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PasswordInput from "./PasswordInput";
 import { loginUser } from "../../lib/api";
+import ReCAPTCHA from "react-google-recaptcha";
 
+console.log(
+  "Site key:",
+  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+);
 export default function LoginForm() {
   const router = useRouter();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+const [formData, setFormData] = useState({
+  email: "",
+  password: "",
+  captchaToken: "",
+});
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,10 +46,11 @@ export default function LoginForm() {
         return;
       }
 
-      if (response.data?.mfaRequired) {
-        router.push("/mfa");
-        return;
-      }
+   if (response.data?.mfaRequired) {
+  localStorage.setItem("mfaEmail", response.data.email);
+  router.push("/mfa");
+  return;
+}
 
      localStorage.setItem("token", response.data.token);
 localStorage.setItem(
@@ -125,6 +133,16 @@ if (response.data.user.role === "admin") {
   Forgot Password?
 </Link>
         </div>
+        <ReCAPTCHA
+  ref={recaptchaRef}
+  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+  onChange={(token) =>
+    setFormData((prev) => ({
+      ...prev,
+      captchaToken: token ?? "",
+    }))
+  }
+/>
 
         <button
           type="submit"

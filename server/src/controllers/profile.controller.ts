@@ -99,6 +99,26 @@ class ProfileController {
       next(error);
     }
   }
+  async importProfile(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await profileService.importProfile(
+      req.user!.userId,
+      req.body
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile imported successfully.",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 export default new ProfileController();

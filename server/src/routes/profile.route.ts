@@ -19,11 +19,18 @@ router.get(
   profileController.exportProfile
 );
 
+
 // Update Profile
 router.put(
   "/",
   authMiddleware,
   profileController.updateProfile
+);
+// Import Profile
+router.post(
+  "/import",
+  authMiddleware,
+  profileController.importProfile
 );
 
 // Upload Profile Image

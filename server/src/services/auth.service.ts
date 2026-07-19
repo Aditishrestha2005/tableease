@@ -71,6 +71,23 @@ class AuthService {
     if (!user) {
       throw new Error("Invalid email or password.");
     }
+    // Require CAPTCHA after 3 failed login attempts
+if (user.failedLoginAttempts >= 3) {
+  if (!validatedData.captchaToken) {
+    throw new Error(
+      "CAPTCHA verification is required."
+    );
+  }
+
+  const captchaValid =
+    await captchaService.verifyCaptcha(
+      validatedData.captchaToken
+    );
+
+  if (!captchaValid) {
+    throw new Error("Invalid CAPTCHA.");
+  }
+}
 
     if (user.lockUntil && user.lockUntil > new Date()) {
       throw new Error(
@@ -87,6 +104,12 @@ if (!passwordMatch) {
 
   if (user.failedLoginAttempts >= 5) {
     user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+
+    await activityLogService.logActivity(
+      String(user._id),
+      "ACCOUNT_LOCKED",
+      "Account locked after 5 failed login attempts."
+    );
   }
 
   await user.save();
@@ -273,7 +296,13 @@ user.passwordHistory.push(hashedPassword);
 
   await sendEmail(user.email, "Reset Your Password", html);
 
-  return true;
+await activityLogService.logActivity(
+  String(user._id),
+  "PASSWORD_RESET_REQUEST",
+  "User requested a password reset."
+);
+
+return true;
 }
 async resetPassword(token?: string, newPassword?: string) {
   if (!token || !newPassword) {
@@ -300,9 +329,15 @@ async resetPassword(token?: string, newPassword?: string) {
       existingUser.passwordHistory.slice(-5);
   }
 
-  await existingUser.save();
+await existingUser.save();
 
-  return true;
+await activityLogService.logActivity(
+  String(existingUser._id),
+  "PASSWORD_RESET_SUCCESS",
+  "User successfully reset their password."
+);
+
+return true;
 }
 }
 
