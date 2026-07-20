@@ -20,6 +20,7 @@ failedLoginAttempts: number;
 
   passwordHistory: string[];
   passwordChangedAt: Date;
+  sessionUserAgentHash?: string;
 
   createdAt: Date;
   updatedAt: Date;
@@ -89,6 +90,10 @@ const userSchema = new Schema<IUser>(
     passwordChangedAt: {
   type: Date,
   default: Date.now,
+},
+sessionUserAgentHash: {
+  type: String,
+  default: "",
 },
   },
   {
