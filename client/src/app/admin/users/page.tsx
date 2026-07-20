@@ -61,6 +61,7 @@ const handleDeleteUser = async () => {
 const handleViewUser = async (user: User) => {
   try {
     const result = await getUserDetails(user._id);
+    console.log(result.data.reservations);
 
     setSelectedUser(result.data.user);
     setUserReservations(result.data.reservations);
@@ -210,7 +211,7 @@ const handleViewUser = async (user: User) => {
       {/* View User Modal */}
 {selectedUser && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+   <div className="w-[900px] max-w-[95vw] rounded-2xl bg-white p-8 shadow-xl">
 
       {/* Title */}
       <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
@@ -277,6 +278,47 @@ const handleViewUser = async (user: User) => {
             {new Date(selectedUser.createdAt).toLocaleDateString()}
           </span>
         </div>
+<div className="border-t pt-4">
+  <h4 className="mb-3 text-lg font-semibold text-gray-900">
+    Reservations
+  </h4>
+
+  {userReservations.length === 0 ? (
+    <p className="text-sm text-gray-500">
+      No reservations found.
+    </p>
+  ) : (
+    <div className="space-y-3">
+      {userReservations.map((reservation: any) => (
+        <div
+          key={reservation._id}
+          className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+        >
+          <p className="text-gray-800">
+            <strong>Table:</strong> {reservation.table.tableNumber}
+          </p>
+
+          <p className="text-gray-800">
+            <strong>Date:</strong>{" "}
+            {new Date(reservation.reservationDate).toLocaleDateString()}
+          </p>
+
+          <p className="text-gray-800">
+            <strong>Time:</strong> {reservation.reservationTime}
+          </p>
+
+          <p className="text-gray-800">
+            <strong>Guests:</strong> {reservation.numberOfGuests}
+          </p>
+
+          <p className="text-gray-800">
+            <strong>Status:</strong> {reservation.status}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
       </div>
 
@@ -293,7 +335,7 @@ const handleViewUser = async (user: User) => {
 )}
 {userToDelete && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+    <div className="w-full max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
       <h2 className="text-2xl font-bold text-gray-900">
         Delete User
       </h2>

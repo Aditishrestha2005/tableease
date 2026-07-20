@@ -58,6 +58,15 @@ class MfaController {
         email,
         token
       );
+      // Set JWT as a secure HttpOnly cookie after successful MFA login
+if (result.token) {
+  res.cookie("token", result.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
+}
 
       return res.status(200).json({
         success: true,

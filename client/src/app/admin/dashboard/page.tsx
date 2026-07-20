@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getAllActivityLogs } from "@/app/lib/api";
 import axios from "axios";
 import {
   Users,
@@ -10,6 +11,7 @@ import {
   CircleX,
   Armchair,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface RecentUser {
   _id: string;
@@ -30,6 +32,12 @@ interface RecentReservation {
   reservationTime: string;
   status: string;
 }
+interface ActivityLog {
+  _id: string;
+  action: string;
+  description: string;
+  createdAt: string;
+}
 
 interface DashboardData {
   totalUsers: number;
@@ -47,6 +55,8 @@ export default function AdminDashboardPage() {
     useState<DashboardData | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [securityAlerts, setSecurityAlerts] = useState<ActivityLog[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchDashboard() {
@@ -63,6 +73,23 @@ export default function AdminDashboardPage() {
         );
 
         setDashboard(response.data.data);
+        const logs = await getAllActivityLogs();
+
+const securityActions = [
+  "LOGIN_SUCCESS",
+  "LOGIN_FAILED",
+  "ACCOUNT_LOCKED",
+  "PASSWORD_CHANGED",
+  "MFA_ENABLED",
+];
+
+setSecurityAlerts(
+  logs.data
+    .filter((log: ActivityLog) =>
+      securityActions.includes(log.action)
+    )
+    .slice(0, 5)
+);
       } catch (error) {
         console.error(error);
       } finally {
@@ -163,10 +190,12 @@ export default function AdminDashboardPage() {
          <h2 className="text-xl font-semibold text-gray-900">
   Latest Users
 </h2>
-
-          <button className="text-sm font-medium text-yellow-600 hover:underline">
-            View All
-          </button>
+<button
+  onClick={() => router.push("/admin/users")}
+  className="rounded-lg bg-yellow-500 px-4 py-2 text-white transition hover:bg-yellow-600"
+>
+  View All
+</button>
         </div>
 
         <table className="w-full">
@@ -204,13 +233,16 @@ export default function AdminDashboardPage() {
 {/* Latest Reservations */}
 <div className="mt-8 rounded-xl bg-white p-6 shadow">
   <div className="mb-5 flex items-center justify-between">
-  <h2 className="text-xl font-semibold">
+  <h2 className="text-xl font-semibold text-gray-900">
   Latest Reservations
 </h2>
 
-    <button className="text-sm font-medium text-yellow-600 hover:underline">
-      View All
-    </button>
+  <button
+  onClick={() => router.push("/admin/reservations")}
+  className="rounded-lg bg-yellow-500 px-4 py-2 text-white transition hover:bg-yellow-600"
+>
+  View All
+</button>
   </div>
 
   <table className="w-full">
@@ -262,6 +294,39 @@ export default function AdminDashboardPage() {
       ))}
     </tbody>
   </table>
+</div>
+{/* Security Alerts */}
+<div className="mt-8 rounded-xl bg-white p-6 shadow">
+  <h2 className="mb-5 text-xl font-semibold text-gray-900">
+    🚨 Security Alerts
+  </h2>
+
+  {securityAlerts.length === 0 ? (
+    <p className="text-gray-500">
+      No recent security alerts.
+    </p>
+  ) : (
+    <div className="space-y-4">
+      {securityAlerts.map((alert) => (
+        <div
+          key={alert._id}
+          className="rounded-lg border-l-4 border-red-500 bg-red-50 p-4"
+        >
+          <p className="font-semibold text-red-700">
+            {alert.action}
+          </p>
+
+          <p className="text-gray-700">
+            {alert.description}
+          </p>
+
+          <p className="mt-1 text-sm text-gray-500">
+            {new Date(alert.createdAt).toLocaleString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
 </div>
     </div>
   );

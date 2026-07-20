@@ -67,9 +67,18 @@ class AuthService {
     const validatedData = loginSchema.parse(userData);
 
     const user = await userRepository.findUserByEmail(validatedData.email);
+    console.log("Before login:", {
+  failedLoginAttempts: user?.failedLoginAttempts,
+  lockUntil: user?.lockUntil,
+});
 
     if (!user) {
       throw new Error("Invalid email or password.");
+    }
+      if (user.lockUntil && user.lockUntil > new Date()) {
+      throw new Error(
+        "Account is temporarily locked. Please try again later."
+      );
     }
     // Require CAPTCHA after 3 failed login attempts
 if (user.failedLoginAttempts >= 3) {
@@ -84,16 +93,17 @@ if (user.failedLoginAttempts >= 3) {
       validatedData.captchaToken
     );
 
-  if (!captchaValid) {
-    throw new Error("Invalid CAPTCHA.");
-  }
+if (!captchaValid) {
+  console.log(
+    "Invalid CAPTCHA. Current failed attempts:",
+    user.failedLoginAttempts
+  );
+
+  throw new Error("Invalid CAPTCHA.");
+}
 }
 
-    if (user.lockUntil && user.lockUntil > new Date()) {
-      throw new Error(
-        "Account is temporarily locked. Please try again later."
-      );
-    }
+  
 
     const passwordMatch = await bcrypt.compare(
       validatedData.password,

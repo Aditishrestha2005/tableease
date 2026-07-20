@@ -3,6 +3,7 @@ import {
   tableSchema,
   updateTableSchema,
 } from "../validators/table.validator";
+import reservationRepository from "../repositories/reservation.repository";
 import activityLogService from "./activityLog.service";
 import availabilityService from "./availability.service";
 
@@ -40,9 +41,26 @@ await activityLogService.logActivity(
 return table;
   }
 
-  async getAllTables() {
-    return await tableRepository.getAllTables();
-  }
+ async getAllTables() {
+  const tables = await tableRepository.getAllTables();
+
+  const today = new Date();
+
+  const reservations =
+    await reservationRepository.getReservationsByDate(today);
+
+  return tables.map((table) => {
+    const isBooked = reservations.some(
+      (reservation) =>
+        String(reservation.table) === String(table._id)
+    );
+
+    return {
+      ...table.toObject(),
+      isBooked,
+    };
+  });
+}
   async getTableById(id: string) {
     const table = await tableRepository.getTableById(id);
 

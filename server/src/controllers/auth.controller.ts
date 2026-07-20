@@ -20,7 +20,16 @@ class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await authService.loginUser(req.body);
-
+     // Set JWT as a secure HttpOnly cookie after successful login
+if (result.token) {
+ res.cookie("token", result.token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/",
+  maxAge: 24 * 60 * 60 * 1000,
+});
+}
     return res.status(200).json({
   success: true,
   message: result.passwordExpired
@@ -108,6 +117,27 @@ await authService.resetPassword(token, newPassword);
     return res.status(200).json({
       success: true,
       message: "Password has been reset successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+async logout(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+  res.clearCookie("token", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/",
+});
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully.",
     });
   } catch (error) {
     next(error);

@@ -80,16 +80,20 @@ const authMiddleware = (
 ) => {
   const authHeader = req.headers.authorization;
 
-  console.log("Authorization Header:", authHeader);
+// First try to read the JWT from the HttpOnly cookie
+let token = req.cookies?.token;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      message: "Access denied. No token provided.",
-    });
-  }
+// If no cookie exists, fall back to Authorization header
+if (!token && authHeader?.startsWith("Bearer ")) {
+  token = authHeader.split(" ")[1];
+}
 
-  const token = authHeader.split(" ")[1];
+if (!token) {
+  return res.status(401).json({
+    success: false,
+    message: "Access denied. No token provided.",
+  });
+}
 
   console.log("Extracted Token:", token);
 

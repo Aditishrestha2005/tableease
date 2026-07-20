@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import Navbar from "../(public)/_components/Navbar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-
+import AuthGuard from "@/components/AuthGuard";
 export default function AdminLayout({
   children,
 }: {
@@ -21,9 +21,9 @@ export default function AdminLayout({
         <AdminSidebar />
 
         {/* ONLY the main contents section will handle vertical scrolling */}
-        <main className="flex-1 overflow-y-auto p-8">
-          {children}
-        </main>
+       <main className="flex-1 overflow-y-auto p-8">
+  <AuthGuard>{children}</AuthGuard>
+</main>
       </div>
     </div>
   );

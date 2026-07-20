@@ -13,6 +13,7 @@ import mfaRoutes from "./routes/mfa.route";
 import cors from "cors";
 import paymentRoutes from "./routes/payment.routes";
 import userRoutes from "./routes/user.route";
+import activityLogRoutes from "./routes/activityLog.routes";
 
 const app = express();
 app.use(
@@ -44,6 +45,7 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/mfa", mfaRoutes);
 app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/activity-logs", activityLogRoutes);
 
 app.get("/api/v1/protected", authMiddleware, (req: AuthRequest, res) => {
   res.status(200).json({

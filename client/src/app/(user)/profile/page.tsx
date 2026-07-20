@@ -35,17 +35,27 @@ const fetchProfile = async () => {
   try {
     const result = await getProfile();
 
-    console.log(result.data.profileImage);
-
     setProfile(result.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+
+    // Remove invalid token
+    localStorage.removeItem("token");
+
+    // Redirect to login
+    router.replace("/login");
   } finally {
     setLoading(false);
   }
 };
-
 useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    router.replace("/login");
+    return;
+  }
+
   fetchProfile();
 }, []);
 const handleSave = async () => {

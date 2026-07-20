@@ -471,3 +471,175 @@ export async function getUserDetails(id: string) {
 
   return result;
 }
+interface TableData {
+  tableNumber: number;
+  capacity: number;
+  location: "Indoor" | "Outdoor" | "VIP";
+  status: "available" | "maintenance";
+}
+
+export async function getAllTables() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/tables`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch tables.");
+  }
+
+  return result;
+}
+
+export async function createTable(data: TableData) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/tables`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to create table.");
+  }
+
+  return result;
+}
+
+export async function getTableDetails(id: string) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/tables/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch table.");
+  }
+
+  return result;
+}
+
+export async function updateTable(
+  id: string,
+  data: Partial<TableData>
+) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/tables/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to update table.");
+  }
+
+  return result;
+}
+
+export async function deleteTable(id: string) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/tables/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to delete table.");
+  }
+
+  return result;
+}
+export async function getAllReservations() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_BASE_URL}/reservations`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to fetch reservations."
+    );
+  }
+
+  return result;
+}
+export async function getAllActivityLogs() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_BASE_URL}/activity-logs`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to fetch activity logs."
+    );
+  }
+
+  return result;
+}
+export async function logoutUser() {
+  console.log("logoutUser() called");
+
+  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  console.log("Logout response status:", response.status);
+
+  const result = await response.json();
+
+  console.log("Logout response:", result);
+
+  if (!response.ok) {
+    throw new Error(result.message || "Logout failed.");
+  }
+
+  localStorage.removeItem("token");
+
+  return result;
+}

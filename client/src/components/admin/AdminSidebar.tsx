@@ -22,7 +22,6 @@ export default function AdminSidebar() {
     { name: "Reservations", href: "/admin/reservations", icon: CalendarDays },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Activity Logs", href: "/admin/activity-logs", icon: Activity },
-    { name: "Reports", href: "/admin/reports", icon: ClipboardList },
   ];
 
   function logout() {

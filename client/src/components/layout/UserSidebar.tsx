@@ -8,6 +8,7 @@ import {
   User,
   LogOut,
 } from "lucide-react";
+import { logoutUser } from "@/app/lib/api";
 
 export default function UserSidebar() {
   const pathname = usePathname();
@@ -31,10 +32,15 @@ export default function UserSidebar() {
     },
   ];
 
-  function handleLogout() {
-    localStorage.removeItem("token");
+ async function handleLogout() {
+  try {
+    await logoutUser();
     router.push("/login");
-  }
+} catch (error) {
+  console.error("Logout failed:", error);
+  alert(String(error));
+}
+}
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-neutral-200 bg-white">
